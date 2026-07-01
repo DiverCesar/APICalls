@@ -1,12 +1,13 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f4f6f8;
+    background: #0f172a;
     padding: 20px;
 }
 
 h1 {
-    color: #003366;
+    color: #38bdf8;
     margin-bottom: 10px;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .header {
@@ -37,8 +38,9 @@ td {
 }
 
 th {
-    background: #003366;
+    background: #38bdf8;
     color: #fff;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
 }
 
 tr:nth-child(even) {
@@ -46,7 +48,7 @@ tr:nth-child(even) {
 }
 
 a {
-    color: #0066cc;
+    color: #38bdf8;
     text-decoration: none;
 }
 
