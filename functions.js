@@ -1,23 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     const countryList = document.getElementById("countryList");
+    const countryInput = document.getElementById("countryInput");
+    const countryForm = document.getElementById("countryForm");
     const searchInput = document.getElementById("search");
     const tableRows = document.querySelectorAll("#universitiesTable tbody tr:not(#emptyStateRow)");
     const noResults = document.getElementById("noResults");
 
+    let validCountries = [];
+
     fetch("https://restcountries.com/v3.1/all?fields=name")
         .then(response => response.json())
         .then(data => {
-            const countries = data.map(item => item.name.common).sort();
+            validCountries = data.map(item => item.name.common).sort();
             
-            countries.forEach(country => {
+            validCountries.forEach(country => {
                 const option = document.createElement("option");
                 option.value = country;
                 countryList.appendChild(option);
             });
         })
-        .catch(error => {
-            console.error("Data fetch error:", error);
-        });
+        .catch(error => console.error("Error:", error));
+
+    countryInput.addEventListener("input", function() {
+        if (validCountries.includes(this.value)) {
+            countryForm.submit();
+        }
+    });
 
     if (searchInput && tableRows.length > 0) {
         searchInput.addEventListener("keyup", function () {
@@ -35,7 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             if (noResults) {
-                noResults.style.display = visibleCount === 0 ? "block" : "none";
+                if (visibleCount === 0) {
+                    noResults.classList.remove("hidden");
+                } else {
+                    noResults.classList.add("hidden");
+                }
             }
         });
     }
