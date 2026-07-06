@@ -12,24 +12,34 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(response => response.json())
         .then(data => {
             validCountries = data.map(item => item.name.common).sort();
-            
             validCountries.forEach(country => {
                 const option = document.createElement("option");
                 option.value = country;
                 countryList.appendChild(option);
             });
         })
-        .catch(error => console.error("Error:", error));
+        .catch(error => console.error("Error consultando la API de países:", error));
 
-    countryInput.addEventListener("input", function() {
-        if (validCountries.includes(this.value)) {
-            countryForm.submit();
-        }
-    });
+    if (countryInput && countryForm) {
+        countryInput.addEventListener("input", function() {
+            if (validCountries.includes(this.value.trim())) {
+                countryForm.submit();
+            }
+        });
+
+        countryInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault(); 
+                if (this.value.trim() !== "") {
+                    countryForm.submit();
+                }
+            }
+        });
+    }
 
     if (searchInput && tableRows.length > 0) {
         searchInput.addEventListener("keyup", function () {
-            const filter = searchInput.value.toLowerCase();
+            const filter = searchInput.value.toLowerCase().trim();
             let visibleCount = 0;
 
             tableRows.forEach(row => {
