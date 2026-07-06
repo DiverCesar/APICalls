@@ -1,11 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const countryList = document.getElementById("countryList");
     const countryInput = document.getElementById("countryInput");
     const countryForm = document.getElementById("countryForm");
     const searchInput = document.getElementById("search");
     const noResults = document.getElementById("noResults");
 
-    // Tu lista quemada de países (perfecta para no hacer peticiones de más)
     const validCountries = [
         "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", 
         "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", 
@@ -34,49 +32,88 @@ document.addEventListener("DOMContentLoaded", () => {
         "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
     ];
 
-    if (countryInput) {
-        countryInput.removeAttribute("autocomplete");
-    }
-
-    validCountries.sort().forEach(country => {
-        const option = document.createElement("option");
-        option.value = country;
-        countryList.appendChild(option);
-    });
-
-    // 1. BUSCADOR DE PAÍSES (Evento "input" para reacción inmediata)
     if (countryInput && countryForm) {
+        countryInput.removeAttribute("list");
+        countryInput.setAttribute("autocomplete", "off");
+        const dropdown = document.createElement("div");
+        dropdown.id = "customCountryDropdown";
+        dropdown.style.position = "absolute";
+        dropdown.style.background = "#1e293b"; 
+        dropdown.style.border = "1px solid #334155";
+        dropdown.style.borderRadius = "8px";
+        dropdown.style.maxHeight = "220px";
+        dropdown.style.overflowY = "auto";
+        dropdown.style.zIndex = "9999";
+        dropdown.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.3)";
+        dropdown.style.display = "none";
+        dropdown.style.marginTop = "4px";
+        countryForm.style.position = "relative";
+        countryForm.appendChild(dropdown);
+
+        const syncWidth = () => { dropdown.style.width = countryInput.offsetWidth + "px"; };
+        syncWidth();
+        window.addEventListener("resize", syncWidth);
+
         countryInput.addEventListener("input", function() {
-            const currentInputValue = this.value.trim().toLowerCase();
-            const match = validCountries.find(c => c.toLowerCase() === currentInputValue);
-            
-            if (match) {
-                this.value = match; 
-                countryForm.submit();
+            const value = this.value.trim().toLowerCase();
+            dropdown.innerHTML = ""; 
+
+            if (!value) {
+                dropdown.style.display = "none";
+                return;
+            }
+            const matches = validCountries.filter(c => c.toLowerCase().includes(value)).sort();
+
+            if (matches.length > 0) {
+                dropdown.style.display = "block";
+                matches.forEach(country => {
+                    const item = document.createElement("div");
+                    item.textContent = country;
+                    item.style.padding = "10px 14px";
+                    item.style.cursor = "pointer";
+                    item.style.color = "#f8fafc";
+                    item.style.transition = "background 0.2s";
+                    item.addEventListener("mouseenter", () => item.style.background = "#334155");
+                    item.addEventListener("mouseleave", () => item.style.background = "transparent");
+                    item.addEventListener("click", () => {
+                        countryInput.value = country;
+                        dropdown.style.display = "none";
+                        countryForm.submit();
+                    });
+
+                    dropdown.appendChild(item);
+                });
+            } else {
+                dropdown.style.display = "none";
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (e.target !== countryInput && e.target !== dropdown) {
+                dropdown.style.display = "none";
             }
         });
     }
 
-    // 2. FILTRO DE UNIVERSIDADES EN LA TABLA
     if (searchInput) {
+        searchInput.setAttribute("autocomplete", "off");
+        
         searchInput.addEventListener("input", function () {
-            const filter = this.value.toLowerCase().trim();
+            const filter = this.value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const tableRows = document.querySelectorAll("#universitiesTable tbody tr:not(#emptyStateRow)");
             let visibleCount = 0;
 
             tableRows.forEach(row => {
-                // ¡AQUÍ ESTÁ LA SOLUCIÓN! Usar textContent garantiza que lea las filas aunque estén ocultas
-                const text = row.textContent.toLowerCase();
+                const text = row.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                 
                 if (text.includes(filter)) {
-                    row.style.display = ""; // Muestra la fila
+                    row.style.display = ""; 
                     visibleCount++;
                 } else {
-                    row.style.display = "none"; // Oculta la fila
+                    row.style.display = "none"; 
                 }
             });
             
-            // Lógica para mostrar u ocultar el mensaje de "No Results"
             if (noResults) {
                 if (visibleCount === 0 && tableRows.length > 0) {
                     noResults.classList.remove("hidden");
