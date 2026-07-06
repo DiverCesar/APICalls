@@ -3,22 +3,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const countryInput = document.getElementById("countryInput");
     const countryForm = document.getElementById("countryForm");
     const searchInput = document.getElementById("search");
-    const tableRows = document.querySelectorAll("#universitiesTable tbody tr:not(#emptyStateRow)");
     const noResults = document.getElementById("noResults");
 
     let validCountries = [];
+
+    if (countryInput) {
+        countryInput.removeAttribute("autocomplete");
+    }
 
     fetch("https://restcountries.com/v3.1/all?fields=name")
         .then(response => response.json())
         .then(data => {
             validCountries = data.map(item => item.name.common).sort();
+            
             validCountries.forEach(country => {
                 const option = document.createElement("option");
                 option.value = country;
                 countryList.appendChild(option);
             });
         })
-        .catch(error => console.error("Error consultando la API de países:", error));
+        .catch(error => console.error(error));
 
     if (countryInput && countryForm) {
         countryInput.addEventListener("input", function() {
@@ -37,9 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (searchInput && tableRows.length > 0) {
+    if (searchInput) {
         searchInput.addEventListener("keyup", function () {
-            const filter = searchInput.value.toLowerCase().trim();
+            const filter = this.value.toLowerCase().trim();
+            const tableRows = document.querySelectorAll("#universitiesTable tbody tr:not(#emptyStateRow)");
             let visibleCount = 0;
 
             tableRows.forEach(row => {
@@ -53,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             if (noResults) {
-                if (visibleCount === 0) {
+                if (visibleCount === 0 && tableRows.length > 0) {
                     noResults.classList.remove("hidden");
                 } else {
                     noResults.classList.add("hidden");
