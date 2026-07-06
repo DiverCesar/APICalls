@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search");
     const noResults = document.getElementById("noResults");
 
+    // Tu lista quemada de países (perfecta para no hacer peticiones de más)
     const validCountries = [
         "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", 
         "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", 
@@ -43,18 +44,20 @@ document.addEventListener("DOMContentLoaded", () => {
         countryList.appendChild(option);
     });
 
+    // 1. BUSCADOR DE PAÍSES (Evento "input" para reacción inmediata)
     if (countryInput && countryForm) {
         countryInput.addEventListener("input", function() {
-            const currentInputValue = this.value.trim();
-            const match = validCountries.find(c => c.toLowerCase() === currentInputValue.toLowerCase());
+            const currentInputValue = this.value.trim().toLowerCase();
+            const match = validCountries.find(c => c.toLowerCase() === currentInputValue);
             
             if (match) {
-                this.value = match;
+                this.value = match; 
                 countryForm.submit();
             }
         });
     }
 
+    // 2. FILTRO DE UNIVERSIDADES EN LA TABLA
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const filter = this.value.toLowerCase().trim();
@@ -62,14 +65,18 @@ document.addEventListener("DOMContentLoaded", () => {
             let visibleCount = 0;
 
             tableRows.forEach(row => {
-                const text = row.innerText.toLowerCase();
+                // ¡AQUÍ ESTÁ LA SOLUCIÓN! Usar textContent garantiza que lea las filas aunque estén ocultas
+                const text = row.textContent.toLowerCase();
+                
                 if (text.includes(filter)) {
-                    row.style.display = "";
+                    row.style.display = ""; // Muestra la fila
                     visibleCount++;
                 } else {
-                    row.style.display = "none";
+                    row.style.display = "none"; // Oculta la fila
                 }
             });
+            
+            // Lógica para mostrar u ocultar el mensaje de "No Results"
             if (noResults) {
                 if (visibleCount === 0 && tableRows.length > 0) {
                     noResults.classList.remove("hidden");
